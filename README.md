@@ -2,6 +2,8 @@
 
 Flexible YAML configuration with Jinja2 superpowers 
 
+WARNING: This is pre-release software.
+
 ## Features
 
 - Load and merge YAML configuration files
