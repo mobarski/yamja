@@ -1,0 +1,18 @@
+a:
+  b:
+    c: 11
+    d: 22
+  e:
+    f: "this is a string"
+    g: >
+      this is
+      a multiline string
+      with a trailing newline
+    h:
+      - 555
+      - 666
+      - 777
+z:
+  - 1
+  - 2
+  - 3
