@@ -40,32 +40,20 @@ value = config.lookup('section.subsection.key', default='fallback')
 # config.yaml
 templates:
   greeting: "Hello {{ name }}!"
-  macros: |
-    {% macro format_list(items) %}
-    {% for item in items %}
-    - {{ item }}
-    {% endfor %}
-    {% endmacro %}
 ```
 
 ```python
 # Render a template with variables
 greeting = config.render('greeting', name='World')
-
-# Use macros in your templates
-items = config.render('list_template', items=['apple', 'banana', 'orange'])
 ```
 
 ### Multiple Configurations
 
 ```python
-from yamja import load_configs, merge_configs
+from yamja import load_configs
 
-# Load multiple config files
+# Load multiple config files and merge them
 configs = load_configs(['base.yaml', 'override.yaml'])
-
-# Merge them with later configs taking precedence
-merged = merge_configs(configs)
 ```
 
 ### Including Other Config Files
