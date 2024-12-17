@@ -3,7 +3,6 @@ from .yamja import (
     lookup,
     load_config,
     load_configs,
-    merge_configs,
 )
 
 __all__ = [
@@ -11,5 +10,4 @@ __all__ = [
     'lookup',
     'load_config',
     'load_configs',
-    'merge_configs',
 ]

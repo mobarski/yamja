@@ -4,17 +4,6 @@ import yaml
 import jinja2
 
 
-# TODO: from environmental variables ???
-# TODO: get rid of aibricks leftovers
-def get_default_config_paths() -> list[str]:
-    return [
-        os.path.join(os.path.dirname(__file__), 'aibricks.yaml'),  # package
-        '/etc/aibricks.yaml',                                      # system
-        '~/.config/aibricks.yaml',                                 # user
-        './aibricks.yaml'                                          # project
-    ]
-
-
 class Config:
     def __init__(self, data: dict):
         loader = jinja2.DictLoader(data.get('templates', {}))
@@ -46,9 +35,9 @@ def load_config(path) -> Config:
     return Config(cfg)
 
 
-def load_configs(config_paths: list[str] = None) -> list[Config]:
-    paths = config_paths if config_paths is not None else get_default_config_paths()
-    return [load_config(path) for path in paths]
+def load_configs(paths: list[str]) -> Config:
+    configs = [load_config(path) for path in paths if os.path.exists(path)]
+    return merge_configs(configs)
 
 
 # TODO: design logic for this
