@@ -55,7 +55,7 @@ greeting = config.render('greeting', name='World')
 from yamja import load_configs
 
 # Load multiple config files and merge them
-configs = load_configs(['base.yaml', 'override.yaml'])
+configs = load_configs(['config.yaml', 'default.yaml'])
 ```
 
 ### Including Other Config Files

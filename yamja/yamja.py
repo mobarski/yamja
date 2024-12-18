@@ -42,7 +42,7 @@ def load_configs(paths: list[str]) -> Config:
 
 # TODO: design logic for this
 def merge_configs(configs: list[Config]) -> Config:
-    """Merge configs with later configs taking precedence"""
+    """Merge configs; later configs are overridden by earlier configs"""
     result = {}
     for config in reversed(configs):  # Explicit precedence order
         if config.data:
