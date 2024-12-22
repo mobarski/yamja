@@ -20,9 +20,10 @@ class Config:
         text = self.lookup('templates.'+key)
         if not text:
             raise KeyError(f'Template {key} not found or not a string')
-        if 'macros' in self.data.get('templates', {}):
-            # TODO: document this
-            header = "{% import 'macros' as macro %}\n"
+        if 'macros' in self.data:
+            macros_str = ''.join(self.data['macros'].values())
+            self.data['templates']['macros'] = macros_str  # add macros to the loader
+            header = "{% import 'macros' as macro %}"
             text = header + text
         template = self.jinja2_env.from_string(text)
         return template.render(**kwargs)
@@ -40,13 +41,17 @@ def load_configs(paths: list[str]) -> Config:
     return merge_configs(configs)
 
 
-# TODO: design logic for this
 def merge_configs(configs: list[Config]) -> Config:
-    """Merge configs; later configs are overridden by earlier configs"""
+    """Merge configs; later configs are overridden by earlier configs;
+    top level dictionaries are merged, other values are overridden"""
     result = {}
-    for config in reversed(configs):  # Explicit precedence order
+    for config in reversed(configs):
         if config.data:
-            result.update(config.data)
+            for k, v in config.data.items():
+                if isinstance(v, dict) and k in result and isinstance(result[k], dict):
+                    result[k].update(v)
+                else:
+                    result[k] = v
     return Config(result)
 
 
@@ -95,5 +100,4 @@ def lookup(data, key, default=...):
             if default is ...:
                 raise KeyError(key)
             return default
-
     return current

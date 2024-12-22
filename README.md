@@ -1,8 +1,18 @@
 # Yamja
 
-Flexible YAML configuration with Jinja2 superpowers 
-
 WARNING: This is pre-release software.
+
+Yamja is an opinionated library for handling yaml configuration files and jinja2 templates - designed for configuration driven development.
+
+It was created after I've realized that I'm repeating the same pattern in many projects. It's not big (100 lines of code) but it offers a consistent and ergonomic way to handle configuration files.
+
+example usage:
+```python
+cfg = yamja.load_config("./game_v1.yaml")
+character = cfg.lookup('characters.marcus')
+game_prompt = cfg.render('game_prompt', character=character)
+```
+
 
 ## Features
 
@@ -10,8 +20,7 @@ WARNING: This is pre-release software.
 - Use Jinja2 templates within your configuration
 - Support for nested configuration lookups using dot notation
 - Include and merge multiple configuration files
-- Built-in support for macros
-- Default configuration paths support
+- Support for jinja2 macros
 
 ## Installation
 
