@@ -19,7 +19,6 @@ game_prompt = cfg.render('game_prompt', character=character)
 - Load and merge YAML configuration files
 - Use Jinja2 templates within your configuration
 - Support for nested configuration lookups using dot notation
-- Include and merge multiple configuration files
 - Support for jinja2 macros
 
 ## Installation
@@ -81,7 +80,7 @@ additional_settings:
 
 ## Requirements
 
-- Python >= 3.13
+- Python >= 3.12
 - Jinja2 >= 3.1.4
 - PyYAML >= 6.0.2
 
