@@ -8,7 +8,7 @@ It was created after I've realized that I'm repeating the same pattern in many p
 
 example usage:
 ```python
-cfg = yamja2.load_config("./game_v1.yaml")
+cfg = yamja.load_config("./game_v1.yaml")
 character = cfg.lookup('characters.marcus')
 game_prompt = cfg.render('game_prompt', character=character)
 ```
