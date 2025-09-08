@@ -9,9 +9,9 @@ MAX_INCLUDE_DEPTH = 100
 
 class Config:
     def __init__(self, data: dict):
-        loader = jinja2.DictLoader(data.get('templates', {}))
-        self.jinja2_env = jinja2.Environment(loader=loader)
         self.data = data
+        loader = jinja2.DictLoader(self.lookup('templates', {}))
+        self.jinja2_env = jinja2.Environment(loader=loader)
 
     def __repr__(self) -> str:
         return f'Config({self.data})'
