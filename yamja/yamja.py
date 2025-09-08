@@ -4,22 +4,23 @@ import yaml
 import jinja2
 
 
+MAX_INCLUDE_DEPTH = 100
+
+
 class Config:
     def __init__(self, data: dict):
         loader = jinja2.DictLoader(data.get('templates', {}))
         self.jinja2_env = jinja2.Environment(loader=loader)
         self.data = data
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f'Config({self.data})'
 
-    def lookup(self, key, default=...):
-        return lookup(self.data, key, default)
+    def lookup(self, key, default=..., env_var=None, cast=None) -> any:
+        return lookup(self.data, key, default, env_var, cast)
 
-    def render(self, key, **kwargs):
-        text = self.lookup('templates.'+key)
-        if not text:
-            raise KeyError(f'Template {key} not found or not a string')
+    def render(self, key, **kwargs) -> str:
+        text = self.lookup('templates.'+key)  # will raise KeyError if not found
         if 'macros' in self.data:
             macros_str = ''.join(self.data['macros'].values())
             self.data['templates']['macros'] = macros_str  # add macros to the loader
@@ -30,38 +31,25 @@ class Config:
 
 
 def load_config(path) -> Config:
+    return _load_config(path, depth=0)
+
+
+def _load_config(path, depth=0) -> Config:
     with open(path, 'r') as f:
-        cfg = yaml.load(f, Loader=yaml.Loader) or {}
-    cfg = handle_include(cfg, path)
+        cfg = yaml.safe_load(f) or {}
+    cfg = _handle_include(cfg, path, depth)
     return Config(cfg)
 
 
-def load_configs(paths: list[str]) -> Config:
-    configs = [load_config(path) for path in paths if os.path.exists(path)]
-    return merge_configs(configs)
-
-
-def merge_configs(configs: list[Config]) -> Config:
-    """Merge configs; later configs are overridden by earlier configs;
-    top level dictionaries are merged, other values are overridden"""
-    result = {}
-    for config in reversed(configs):
-        if config.data:
-            for k, v in config.data.items():
-                if isinstance(v, dict) and k in result and isinstance(result[k], dict):
-                    result[k].update(v)
-                else:
-                    result[k] = v
-    return Config(result)
-
-
-def handle_include(cfg, path):
+def _handle_include(cfg, path, depth=0):
+    if depth > MAX_INCLUDE_DEPTH:
+        raise ValueError(f'Include depth limit reached: {path}')
     if not isinstance(cfg, dict) or 'include' not in cfg:
         return cfg
 
     for include in cfg['include']:
         include_path = os.path.join(os.path.dirname(path), include)
-        chunk = load_config(include_path).data
+        chunk = _load_config(include_path, depth+1).data
         if not isinstance(chunk, dict):
             continue
         # merge top level
@@ -83,10 +71,31 @@ def handle_include(cfg, path):
     return cfg
 
 
-def lookup(data, key, default=...):
-    """Look up a value in nested data structures using dot notation."""
-    current = data
+def lookup(data, key, default=..., env_var=None, cast=None):
+    """Look up a value in a nested data structure using dot notation.
 
+    Args:
+        data: The nested data structure to look up the value in.
+        key: The dot-separated key path to look up.
+        default: The value to return if the key is not found. If omitted
+            or set to Ellipsis (...), a missing key raises KeyError. When
+            provided together with `cast`, the default is also cast.
+        env_var: Name of the environment variable to use as an override
+            when present in os.environ (empty string allowed).
+        cast: Callable to cast the resulting value (applied to env/config/default).
+
+    Precedence: environment variable (if present) > config value > default.
+
+    Notes:
+        - Default is used only when the key is missing, not when the found value is falsy.
+        - List indices in keys are supported, including negative indices.
+    """
+
+    if env_var and env_var in os.environ:
+        value = os.getenv(env_var)
+        return cast(value) if cast else value
+
+    current = data
     for part in key.split('.'):
         try:
             # Handle both positive and negative indices
@@ -96,8 +105,8 @@ def lookup(data, key, default=...):
                 current = current[part]
             else:
                 current = getattr(current, part)
-        except (KeyError, IndexError, AttributeError):
+        except (KeyError, IndexError, AttributeError, TypeError):
             if default is ...:
                 raise KeyError(key)
-            return default
-    return current
+            return cast(default) if cast else default
+    return cast(current) if cast else current

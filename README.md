@@ -4,11 +4,11 @@ WARNING: This is pre-release software.
 
 Yamja is an opinionated library for handling yaml configuration files and jinja2 templates - designed for configuration driven development.
 
-It was created after I've realized that I'm repeating the same pattern in many projects. It's not big (100 lines of code) but it offers a consistent and ergonomic way to handle configuration files.
+It was created after I've realized that I'm repeating the same pattern in many projects. It's not big (around 100 lines of code) but it offers a consistent and ergonomic way to handle configuration files.
 
 example usage:
 ```python
-cfg = yamja.load_config("./game_v1.yaml")
+cfg = yamja2.load_config("./game_v1.yaml")
 character = cfg.lookup('characters.marcus')
 game_prompt = cfg.render('game_prompt', character=character)
 ```
@@ -16,9 +16,10 @@ game_prompt = cfg.render('game_prompt', character=character)
 
 ## Features
 
-- Load and merge YAML configuration files
+- Load YAML configuration files
 - Use Jinja2 templates within your configuration
 - Support for nested configuration lookups using dot notation
+- Support for environmental variables overriding lookups
 - Support for jinja2 macros
 
 ## Installation
@@ -34,7 +35,7 @@ pip install yamja
 ```python
 from yamja import load_config
 
-# Load a single configuration file
+# Load a configuration file
 config = load_config('config.yaml')
 
 # Access values using dot notation
@@ -42,7 +43,17 @@ value = config.lookup('section.subsection.key')
 
 # Access with default value
 value = config.lookup('section.subsection.key', default='fallback')
+
+# Access with environmental variable override
+value = config.lookup('other_section.key', default=123, env_var='OTHER_KEY', cast=int)
+
 ```
+
+### Defaults and precedence
+
+- **Omitting `default` (or passing `...`)**: raises `KeyError` when the key is missing.
+- **Precedence**: environment variable (if present) > config value > default.
+- **Casting**: `cast` is applied to the selected source (env/config/default).
 
 ### Template Rendering
 
@@ -57,14 +68,6 @@ templates:
 greeting = config.render('greeting', name='World')
 ```
 
-### Multiple Configurations
-
-```python
-from yamja import load_configs
-
-# Load multiple config files and merge them
-configs = load_configs(['config.yaml', 'default.yaml'])
-```
 
 ### Including Other Config Files
 
