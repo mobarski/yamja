@@ -1,3 +1,4 @@
+from typing import Any
 import os
 
 import yaml
@@ -16,7 +17,7 @@ class Config:
     def __repr__(self) -> str:
         return f'Config({self.data})'
 
-    def lookup(self, key, default=..., env_var=None, cast=None) -> any:
+    def lookup(self, key, default=..., env_var=None, cast=None) -> Any:
         return lookup(self.data, key, default, env_var, cast)
 
     def render(self, key, **kwargs) -> str:

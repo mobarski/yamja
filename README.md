@@ -68,6 +68,34 @@ templates:
 greeting = config.render('greeting', name='World')
 ```
 
+```yaml
+# more practical example
+characters:
+  jane:
+    name: Jane Doe
+    age: 30
+    skills:
+      - hacking
+      - parkour
+      - martial arts
+
+templates:
+  character_prompt: |
+    <CHARACTER>
+      <NAME>{{ character.name }}</NAME>
+      <AGE>{{ character.age }}</AGE>
+      <SKILLS>
+        {% for skill in character.skills %}
+          <SKILL>{{ skill }}</SKILL>
+        {% endfor %}
+      </SKILLS>
+    </CHARACTER>
+```
+
+```python
+character = config.lookup('characters.jane')
+character_prompt = config.render('character_prompt', character=character)
+```
 
 ### Including Other Config Files
 
@@ -83,9 +111,9 @@ additional_settings:
 
 ## Requirements
 
-- Python >= 3.12
-- Jinja2 >= 3.1.4
-- PyYAML >= 6.0.2
+- Python >= 3.8
+- Jinja2
+- PyYAML
 
 ## License
 
